@@ -77,8 +77,10 @@ export const Header: React.FC<HeaderProps> = ({ progress, level, username, avata
           </div>
 
           {/* Logout Dropdown/Tooltip */}
-          <div className="absolute right-0 top-full mt-2 pt-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all translate-y-2 group-hover:translate-y-0 z-50">
-            <div className="bg-godot-darker border border-white/10 rounded-xl shadow-2xl p-2 min-w-[150px]">
+          <div className="absolute right-0 top-full pt-3 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all translate-y-1 group-hover:translate-y-0 z-50">
+            <div className="bg-godot-darker border border-white/10 rounded-xl shadow-2xl p-2 min-w-[150px] relative">
+              {/* Invisible bridge to prevent losing hover */}
+              <div className="absolute -top-3 left-0 w-full h-3" />
               <a 
                 href={`${API_URL}/api/auth/logout`}
                 className="flex items-center gap-3 px-3 py-2 text-sm text-white/60 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
