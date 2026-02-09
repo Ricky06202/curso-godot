@@ -1,0 +1,118 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { AdminSidebar } from '../components/AdminSidebar';
+import { Video, Plus, Edit2, Trash2, GripVertical, Search } from 'lucide-react';
+
+// LOGICA DE PROTECCIÓN (Simulada por ahora, debería venir de la sesión)
+const ADMIN_EMAIL = "ricardosanjurg@gmail.com";
+const userEmail = "ricardosanjurg@gmail.com"; // Aquí capturarías el email real del usuario logueado
+
+const isAdmin = userEmail === ADMIN_EMAIL;
+
+if (!isAdmin) {
+  return Astro.redirect('/dashboard');
+}
+
+// Fetch de lecciones reales desde tu API
+const API_URL = 'https://godotapi.rsanjur.com';
+let lessons = [];
+try {
+  const res = await fetch(`${API_URL}/api/course/1`); // Usamos cualquier ID para obtener todas las lecciones
+  const data = await res.json();
+  lessons = data.lessons;
+} catch (e) {
+  // Fallback si la API no responde
+  lessons = [
+    { id: 1, title: "Introducción", order: 1, videoUrl: "..." },
+    { id: 2, title: "Nodos", order: 2, videoUrl: "..." }
+  ];
+}
+---
+
+<Layout title="Panel de Administración">
+  <div class="flex min-h-screen bg-godot-dark">
+    <AdminSidebar client:load />
+
+    <main class="flex-1 p-8 overflow-y-auto">
+      <header class="flex justify-between items-center mb-10">
+        <div>
+          <h1 class="text-3xl font-bold">Gestión de Lecciones</h1>
+          <p class="text-white/50 mt-1">Crea, edita y organiza el contenido del curso de Godot 4.6</p>
+        </div>
+
+        <button class="bg-godot-blue hover:bg-godot-blue/80 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-godot-blue/20">
+          <Plus className="w-5 h-5" />
+          Nueva Lección
+        </button>
+      </header>
+
+      {/* Stats Quick View */}
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="glass p-6 rounded-2xl border border-white/10">
+          <p class="text-white/50 text-xs uppercase tracking-widest font-bold mb-2">Total Lecciones</p>
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-godot-blue/20 rounded-xl flex items-center justify-center text-godot-blue">
+              <Video className="w-6 h-6" />
+            </div>
+            <span class="text-3xl font-bold">{lessons.length}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Table / List */}
+      <div class="glass rounded-2xl border border-white/10 overflow-hidden">
+        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+          <div class="relative w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <input 
+              type="text" 
+              placeholder="Buscar lección..." 
+              class="w-full bg-godot-dark border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-godot-blue/50"
+            />
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-white/5 text-[10px] uppercase tracking-widest text-white/40 font-bold">
+                <th class="px-6 py-4">Orden</th>
+                <th class="px-6 py-4">Título de la Lección</th>
+                <th class="px-6 py-4">ID</th>
+                <th class="px-6 py-4 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+              {lessons.map((lesson) => (
+                <tr class="hover:bg-white/5 transition-colors group">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <GripVertical className="w-4 h-4 text-white/20 group-hover:text-white/40 cursor-grab" />
+                      <span class="font-mono text-godot-blue">#{lesson.order}</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <span class="font-medium text-sm">{lesson.title}</span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <span class="text-xs text-white/30 font-mono">{lesson.id}</span>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button class="p-2 hover:bg-godot-blue/20 hover:text-godot-blue rounded-lg transition-all" title="Editar">
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button class="p-2 hover:bg-red-500/20 hover:text-red-500 rounded-lg transition-all" title="Eliminar">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</Layout>
