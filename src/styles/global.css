@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-godot-blue: #478cbf;
+  --color-godot-dark: #202531;
+  --color-godot-green: #94db74;
+  --color-godot-darker: #1a1e27;
+  
+  --font-inter: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --radius-xl: 1rem;
+}
+
+@layer base {
+  :root {
+    --background: 32 37 49; /* #202531 */
+    --foreground: 255 255 255;
+  }
+
+  body {
+    @apply bg-godot-dark text-white font-inter antialiased;
+    margin: 0;
+    padding: 0;
+  }
+
+  code {
+    @apply font-mono;
+  }
+}
+
+/* Custom scrollbar for lesson list */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-godot-darker;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-godot-blue/30 rounded-full hover:bg-godot-blue/50 transition-colors;
+}
+
+/* Glassmorphism effects */
+.glass {
+  @apply bg-white/5 backdrop-blur-md border border-white/10;
+}
+
+/* Glow effect for login buttons */
+.glow-blue {
+  box-shadow: 0 0 15px rgba(71, 140, 191, 0.4);
+}
+
+.glow-green {
+  box-shadow: 0 0 15px rgba(148, 219, 116, 0.4);
+}

@@ -1,0 +1,126 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Header } from '../components/Header';
+import { VideoPlayer } from '../components/VideoPlayer';
+import { LessonList } from '../components/LessonList';
+import { ResourceBox } from '../components/ResourceBox';
+import { CompletionButton } from '../components/CompletionButton';
+import { FloatingMenu } from '../components/FloatingMenu';
+
+// Configuración de la API
+const API_URL = 'https://godotapi.rsanjur.com';
+const userId = "1"; // Esto debería venir de la sesión del usuario (cookie/token)
+
+// Fetch dinámico de datos desde el backend externo
+let lessons = [];
+let userProgress = [];
+let error = null;
+
+try {
+  const response = await fetch(`${API_URL}/api/course/${userId}`);
+  if (response.ok) {
+    const data = await response.json();
+    lessons = data.lessons;
+    userProgress = data.progress;
+    
+    // Mapear el progreso a las lecciones
+    lessons = lessons.map(lesson => ({
+      ...lesson,
+      completed: userProgress.some(p => p.lessonId === lesson.id && p.completed)
+    }));
+  } else {
+    error = "Error al cargar los datos del curso";
+  }
+} catch (e) {
+  error = "No se pudo conectar con el servidor";
+}
+
+// Fallback data si la API falla o no hay datos aún
+if (lessons.length === 0) {
+  lessons = [
+    { id: '1', title: 'Introducción a Godot 4.6', duration: '05:00', completed: true },
+    { id: '2', title: 'Nodos y Escenas', duration: '04:45', completed: true },
+    { id: '3', title: 'GDScript Essentials', duration: '05:12', completed: false },
+    { id: '4', title: 'Señales y Comunicación', duration: '04:30', completed: false },
+    { id: '5', title: 'Física en 2D', duration: '05:30', completed: false, isLocked: false },
+    { id: '6', title: 'Animaciones con Sprite2D', duration: '04:15', completed: false, isLocked: true },
+  ];
+}
+
+const activeLesson = lessons.find(l => !l.completed) || lessons[0];
+const progress = Math.round((lessons.filter(l => l.completed).length / lessons.length) * 100);
+const level = Math.floor(progress / 10) + 1;
+
+const gdscriptCode = `extends CharacterBody2D
+
+const SPEED = 300.0
+const JUMP_VELOCITY = -400.0
+
+func _physics_process(delta: float) -> void:
+	# Add the gravity.
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+
+	# Handle jump.
+	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
+		velocity.y = JUMP_VELOCITY
+
+	# Get the input direction and handle the movement/deceleration.
+	var direction := Input.get_axis("ui_left", "ui_right")
+	if direction:
+		velocity.x = direction * SPEED
+	else:
+		velocity.x = move_toward(velocity.x, 0, SPEED)
+
+	move_and_slide()`;
+---
+
+<Layout title="Dashboard">
+	<Header 
+		client:load 
+		progress={progress} 
+		level={level} 
+		username="Ricardo" 
+	/>
+
+	<main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 max-w-[1600px] mx-auto w-full">
+		<!-- Left Column: Video & Resources -->
+		<div class="lg:col-span-8 flex flex-col gap-6">
+			<div class="space-y-4">
+				<VideoPlayer client:load videoUrl="#" thumbnail="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1200&auto=format&fit=crop" />
+				
+				<div class="flex items-center justify-between">
+					<div>
+						<h1 class="text-2xl font-bold text-white">{activeLesson.title}</h1>
+						<p class="text-white/50 text-sm mt-1">Módulo 1: Fundamentos de Godot</p>
+					</div>
+					<CompletionButton 
+						client:load 
+						lessonId={activeLesson.id} 
+						userId="1" 
+						isCompleted={activeLesson.completed} 
+					/>
+				</div>
+			</div>
+
+			<ResourceBox 
+				client:load 
+				description="En esta lección aprenderemos los conceptos básicos de GDScript, el lenguaje de programación nativo de Godot. Veremos variables, funciones y cómo interactuar con el árbol de escenas."
+				code={gdscriptCode}
+				downloadUrl="#"
+			/>
+		</div>
+
+		<!-- Right Column: Lesson List -->
+		<div class="lg:col-span-4 h-[calc(100vh-140px)] sticky top-[100px]">
+			<LessonList 
+				client:load 
+				lessons={lessons} 
+				activeLessonId={activeLesson.id}
+				onLessonSelect={() => {}} 
+			/>
+		</div>
+	</main>
+
+	<FloatingMenu client:load />
+</Layout>
