@@ -2,12 +2,17 @@ import React from 'react';
 import { LayoutDashboard, Video, Users, Settings, LogOut, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export const AdminSidebar: React.FC = () => {
+interface AdminSidebarProps {
+  activeSection: string;
+  onSectionChange: (section: string) => void;
+}
+
+export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection, onSectionChange }) => {
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Resumen', active: true },
-    { icon: Video, label: 'Lecciones', active: false },
-    { icon: Users, label: 'Estudiantes', active: false },
-    { icon: Settings, label: 'Configuración', active: false },
+    { id: 'resumen', icon: LayoutDashboard, label: 'Resumen' },
+    { id: 'lecciones', icon: Video, label: 'Lecciones' },
+    { id: 'estudiantes', icon: Users, label: 'Estudiantes' },
+    { id: 'configuracion', icon: Settings, label: 'Configuración' },
   ];
 
   return (
@@ -25,15 +30,22 @@ export const AdminSidebar: React.FC = () => {
       <nav className="flex-1 space-y-2">
         {menuItems.map((item) => (
           <button
-            key={item.label}
+            key={item.id}
+            onClick={() => onSectionChange(item.id)}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-              item.active 
-                ? 'bg-godot-blue/10 text-godot-blue border border-godot-blue/20' 
+              activeSection === item.id
+                ? 'bg-godot-blue/10 text-godot-blue border border-godot-blue/20 shadow-lg shadow-godot-blue/5' 
                 : 'text-white/50 hover:bg-white/5 hover:text-white'
             }`}
           >
-            <item.icon className="w-5 h-5" />
+            <item.icon className={`w-5 h-5 ${activeSection === item.id ? 'text-godot-blue' : 'text-current'}`} />
             {item.label}
+            {activeSection === item.id && (
+              <motion.div 
+                layoutId="activeTab"
+                className="ml-auto w-1.5 h-1.5 rounded-full bg-godot-blue"
+              />
+            )}
           </button>
         ))}
       </nav>

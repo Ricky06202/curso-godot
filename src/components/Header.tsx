@@ -11,8 +11,18 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ progress, level, username, avatarUrl, userEmail }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isAdmin = userEmail === "ricardosanjurg@gmail.com";
   const API_URL = 'https://godotapi.rsanjur.com';
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setIsMenuOpen(false);
+    if (isMenuOpen) {
+      window.addEventListener('click', handleClickOutside);
+    }
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, [isMenuOpen]);
 
   return (
     <header className="sticky top-0 z-50 w-full glass border-b border-white/10 px-6 py-3 flex items-center justify-between">
@@ -65,8 +75,14 @@ export const Header: React.FC<HeaderProps> = ({ progress, level, username, avata
           <p className="text-[10px] text-white/50 mt-1 uppercase tracking-tighter">Godot Developer</p>
         </div>
         
-        <div className="group relative">
-          <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-godot-blue/50 p-0.5 bg-godot-darker cursor-pointer">
+        <div className="relative">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMenuOpen(!isMenuOpen);
+            }}
+            className="w-10 h-10 rounded-xl overflow-hidden border-2 border-godot-blue/50 p-0.5 bg-godot-darker cursor-pointer hover:border-godot-blue transition-colors focus:outline-none"
+          >
             {avatarUrl ? (
               <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-[10px]" />
             ) : (
@@ -74,13 +90,19 @@ export const Header: React.FC<HeaderProps> = ({ progress, level, username, avata
                 <User className="w-6 h-6 text-godot-blue" />
               </div>
             )}
-          </div>
+          </button>
 
           {/* Logout Dropdown/Tooltip */}
-          <div className="absolute right-0 top-full pt-3 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all translate-y-1 group-hover:translate-y-0 z-50">
-            <div className="bg-godot-darker border border-white/10 rounded-xl shadow-2xl p-2 min-w-[150px] relative">
-              {/* Invisible bridge to prevent losing hover */}
-              <div className="absolute -top-3 left-0 w-full h-3" />
+          <div className={`absolute right-0 top-full pt-3 transition-all z-50 ${
+            isMenuOpen 
+              ? 'opacity-100 translate-y-0 pointer-events-auto' 
+              : 'opacity-0 translate-y-1 pointer-events-none'
+          }`}>
+            <div className="bg-godot-darker border border-white/10 rounded-xl shadow-2xl p-2 min-w-[150px]">
+              <div className="md:hidden px-3 py-2 border-b border-white/5 mb-1">
+                <p className="text-xs font-bold text-white/80 truncate">{username || 'Estudiante'}</p>
+                <p className="text-[10px] text-white/40 uppercase">LVL {level}</p>
+              </div>
               <a 
                 href={`${API_URL}/api/auth/logout`}
                 className="flex items-center gap-3 px-3 py-2 text-sm text-white/60 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
