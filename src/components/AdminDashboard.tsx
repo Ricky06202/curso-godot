@@ -28,7 +28,7 @@ interface AdminDashboardProps {
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, initialUsers = [] }) => {
-  const [activeSection, setActiveSection] = useState('lecciones');
+  const [activeSection, setActiveSection] = useState('resumen');
   const [lessons, setLessons] = useState<Lesson[]>(initialLessons);
   const [students, setStudents] = useState<Student[]>(initialUsers);
   const [globalStats, setGlobalStats] = useState<any>(null);
