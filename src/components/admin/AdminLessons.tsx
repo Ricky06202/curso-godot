@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Search, GripVertical, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Search, GripVertical, Edit2, Trash2, FileText } from 'lucide-react';
 
 interface Lesson {
   id: number;
@@ -12,9 +12,12 @@ interface AdminLessonsProps {
   lessons: Lesson[];
   onEdit: (lesson: Lesson) => void;
   onDelete: (lesson: Lesson) => void;
+  onAdd: () => void;
+  onReorder?: (reorderedLessons: { id: number; order: number }[]) => void;
+  onManageResources?: (lesson: Lesson) => void;
 }
 
-export const AdminLessons: React.FC<AdminLessonsProps> = ({ lessons, onEdit, onDelete }) => {
+export const AdminLessons: React.FC<AdminLessonsProps> = ({ lessons, onEdit, onDelete, onAdd, onManageResources }) => {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <header className="flex justify-between items-center mb-10">
@@ -22,7 +25,10 @@ export const AdminLessons: React.FC<AdminLessonsProps> = ({ lessons, onEdit, onD
           <h1 className="text-3xl font-bold text-white">Gestión de Lecciones</h1>
           <p className="text-white/50 mt-1">Crea, edita y organiza el contenido del curso.</p>
         </div>
-        <button className="bg-godot-blue hover:bg-godot-blue/80 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-godot-blue/20">
+        <button 
+          onClick={onAdd}
+          className="bg-godot-blue hover:bg-godot-blue/80 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-godot-blue/20"
+        >
           <Plus className="w-5 h-5" />
           Nueva Lección
         </button>
@@ -55,6 +61,13 @@ export const AdminLessons: React.FC<AdminLessonsProps> = ({ lessons, onEdit, onD
                 <td className="px-6 py-4 text-sm font-medium">{lesson.title}</td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
+                    <button 
+                      onClick={() => onManageResources?.(lesson)} 
+                      title="Gestionar Recursos"
+                      className="p-2 hover:bg-white/10 text-white/40 hover:text-white rounded-lg transition-all"
+                    >
+                      <FileText className="w-4 h-4" />
+                    </button>
                     <button onClick={() => onEdit(lesson)} className="p-2 hover:bg-godot-blue/20 hover:text-godot-blue rounded-lg transition-all"><Edit2 className="w-4 h-4" /></button>
                     <button onClick={() => onDelete(lesson)} className="p-2 hover:bg-red-500/20 hover:text-red-500 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                   </div>

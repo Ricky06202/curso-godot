@@ -1,14 +1,24 @@
 import React from 'react';
 import { Users, CheckCircle, Clock, Video, TrendingUp } from 'lucide-react';
 
+interface Student {
+  id: string;
+  username: string;
+  email: string;
+  avatar?: string;
+  progress?: number;
+  joinedDate?: string;
+}
+
 interface AdminSummaryProps {
   studentsCount: number;
   lessonsCount: number;
-  students: any[];
+  completionRate?: number;
+  students: Student[];
   lessons: any[];
 }
 
-export const AdminSummary: React.FC<AdminSummaryProps> = ({ studentsCount, lessonsCount, students, lessons }) => {
+export const AdminSummary: React.FC<AdminSummaryProps> = ({ studentsCount, lessonsCount, completionRate, students, lessons }) => {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <header>
@@ -17,8 +27,8 @@ export const AdminSummary: React.FC<AdminSummaryProps> = ({ studentsCount, lesso
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Estudiantes" value={studentsCount.toString()} icon={Users} trend="+12%" color="blue" />
-        <StatCard title="Completado" value="68%" icon={CheckCircle} trend="+5%" color="green" />
+        <StatCard title="Usuarios" value={studentsCount.toString()} icon={Users} trend={`+${studentsCount}`} color="blue" />
+        <StatCard title="Completado" value={`${completionRate || 0}%`} icon={CheckCircle} color="green" />
         <StatCard title="Tiempo Promedio" value="42min" icon={Clock} color="purple" />
         <StatCard title="Lecciones" value={lessonsCount.toString()} icon={Video} color="godot" />
       </div>
@@ -27,17 +37,21 @@ export const AdminSummary: React.FC<AdminSummaryProps> = ({ studentsCount, lesso
         <div className="glass p-6 rounded-2xl border border-white/10">
           <h3 className="font-bold mb-4 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-godot-green" />
-            Actividad Reciente
+            Usuarios Recientes
           </h3>
           <div className="space-y-4">
-            {students.map((student) => (
+            {students.slice(0, 5).map((student) => (
               <div key={student.id} className="flex items-center gap-4 p-3 rounded-xl bg-white/5 border border-white/5">
-                <div className="w-10 h-10 rounded-full bg-godot-blue/20 flex items-center justify-center text-godot-blue text-xs font-bold uppercase">
-                  {student.name.charAt(0)}
-                </div>
+                {student.avatar ? (
+                  <img src={student.avatar} alt={student.username} className="w-10 h-10 rounded-full border border-white/10" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-godot-blue/20 flex items-center justify-center text-godot-blue text-xs font-bold uppercase">
+                    {student.username.charAt(0)}
+                  </div>
+                )}
                 <div className="flex-1">
-                  <p className="text-sm font-medium">{student.name} progresó en el curso</p>
-                  <p className="text-[10px] text-white/30">Progreso actual: {student.progress}%</p>
+                  <p className="text-sm font-medium">{student.username}</p>
+                  <p className="text-[10px] text-white/30">{student.email}</p>
                 </div>
               </div>
             ))}
