@@ -145,6 +145,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons =
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
+      console.log('Iniciando carga de datos desde:', BASE_URL);
       try {
         const [usersRes, statsRes, configRes, lessonsRes] = await Promise.all([
           fetch(USERS_API_URL),
@@ -153,15 +154,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons =
           fetch(API_URL)
         ]);
 
-        if (usersRes.ok) setStudents(await usersRes.json());
-        if (statsRes.ok) setGlobalStats(await statsRes.json());
+        if (usersRes.ok) {
+          const users = await usersRes.json();
+          console.log('Usuarios cargados:', users.length);
+          setStudents(users);
+        }
+        
+        if (statsRes.ok) {
+          const stats = await statsRes.json();
+          console.log('Estadísticas cargadas:', stats);
+          setGlobalStats(stats);
+        }
+
         if (configRes.ok) {
           const configData = await configRes.json();
+          console.log('Configuración cargada');
           setConfig(configData);
         }
-        if (lessonsRes.ok) setLessons(await lessonsRes.json());
+
+        if (lessonsRes.ok) {
+          const lessonsData = await lessonsRes.json();
+          console.log('Lecciones cargadas:', lessonsData.length, lessonsData);
+          setLessons(lessonsData);
+        } else {
+          console.error('Error al cargar lecciones:', lessonsRes.status);
+        }
       } catch (error) {
-        console.error('Error fetching admin data:', error);
+        console.error('Error crítico en fetchData:', error);
       } finally {
         setIsLoading(false);
       }
