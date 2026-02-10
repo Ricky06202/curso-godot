@@ -23,14 +23,15 @@ interface Student {
 }
 
 interface AdminDashboardProps {
-  initialLessons: Lesson[];
+  initialLessons?: Lesson[];
   initialUsers?: Student[];
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, initialUsers = [] }) => {
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons = [], initialUsers = [] }) => {
   const [activeSection, setActiveSection] = useState('resumen');
   const [lessons, setLessons] = useState<Lesson[]>(initialLessons);
   const [students, setStudents] = useState<Student[]>(initialUsers);
+  const [isLoading, setIsLoading] = useState(true);
   const [globalStats, setGlobalStats] = useState<any>(null);
   const [config, setConfig] = useState<any>({});
 
@@ -143,6 +144,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const [usersRes, statsRes, configRes, lessonsRes] = await Promise.all([
           fetch(USERS_API_URL),
@@ -160,11 +162,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
         if (lessonsRes.ok) setLessons(await lessonsRes.json());
       } catch (error) {
         console.error('Error fetching admin data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-godot-dark items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-godot-blue border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-white/50 font-medium animate-pulse">Cargando panel...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleUpdateConfig = async (updatedConfig: any) => {
     try {
