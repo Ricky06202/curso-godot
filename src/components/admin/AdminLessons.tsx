@@ -17,7 +17,7 @@ interface AdminLessonsProps {
   onManageResources?: (lesson: Lesson) => void;
 }
 
-export const AdminLessons: React.FC<AdminLessonsProps> = ({ lessons, onEdit, onDelete, onAdd, onManageResources }) => {
+export const AdminLessons: React.FC<AdminLessonsProps> = ({ lessons, onEdit, onDelete, onAdd, onManageResources, onReorder }) => {
   const [searchTerm, setSearchTerm] = React.useState('');
 
   const filteredLessons = lessons
@@ -85,8 +85,8 @@ export const AdminLessons: React.FC<AdminLessonsProps> = ({ lessons, onEdit, onD
                     >
                       <FileText className="w-4 h-4" />
                     </button>
-                    <button onClick={() => onEdit(lesson)} className="p-2 hover:bg-godot-blue/20 hover:text-godot-blue rounded-lg transition-all"><Edit2 className="w-4 h-4" /></button>
-                    <button onClick={() => onDelete(lesson)} className="p-2 hover:bg-red-500/20 hover:text-red-500 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => onEdit(lesson)} title="Editar" className="p-2 hover:bg-godot-blue/20 hover:text-godot-blue rounded-lg transition-all"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => onDelete(lesson)} title="Eliminar" className="p-2 hover:bg-red-500/20 hover:text-red-500 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </td>
               </tr>

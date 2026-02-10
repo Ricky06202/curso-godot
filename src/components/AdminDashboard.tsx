@@ -110,15 +110,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
     }
   }, [viewingStudentProgress]);
 
+  const fetchGlobalStats = async () => {
+    try {
+      const response = await fetch(STATS_API_URL);
+      if (response.ok) {
+        setGlobalStats(await response.json());
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
   const fetchLessons = async () => {
     try {
       const response = await fetch(API_URL);
       if (response.ok) {
-        setLessons(await response.json());
+        const data = await response.json();
+        setLessons(data);
+        console.log('Lecciones actualizadas en el estado:', data.length);
       }
     } catch (error) {
       console.error('Error fetching lessons:', error);
     }
+  };
+
+  const refreshAllData = async () => {
+    await Promise.all([
+      fetchLessons(),
+      fetchGlobalStats()
+    ]);
   };
 
   useEffect(() => {
@@ -172,7 +192,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
       });
       if (response.ok) {
         // Refresh lessons from server to get correct order
-        await fetchLessons();
+        await refreshAllData();
       }
     } catch (error) {
       console.error('Error reordering lessons:', error);
@@ -189,7 +209,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
           body: JSON.stringify(data),
         });
         if (response.ok) {
-          await fetchLessons();
+          await refreshAllData();
         }
       } else {
         // Editar : PUT /api/lessons/:id
@@ -199,7 +219,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
           body: JSON.stringify(data),
         });
         if (response.ok) {
-          await fetchLessons();
+          await refreshAllData();
         }
       }
       setEditingItem(null);
@@ -211,17 +231,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
   const handleDelete = async () => {
     if (!deletingItem) return;
     
+    console.log('Intentando eliminar lección:', deletingItem.id);
     try {
       // Eliminar : DELETE /api/lessons/:id
       const response = await fetch(`${API_URL}/${deletingItem.id}`, {
         method: 'DELETE',
       });
       
+      console.log('Respuesta de eliminación:', response.status);
+      
       if (response.ok) {
-        await fetchLessons();
+        console.log('Eliminación exitosa, refrescando todos los datos...');
+        await refreshAllData();
+      } else {
+        const errorText = await response.text();
+        console.error('Error en la API al eliminar:', errorText);
       }
     } catch (error) {
-      console.error('Error deleting lesson:', error);
+      console.error('Error de red al eliminar lección:', error);
     }
     
     setDeletingItem(null);
