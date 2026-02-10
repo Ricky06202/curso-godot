@@ -93,8 +93,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
     }
   };
 
-  useEffect(() => {
-    const fetchStudentProgress = async (studentId: string) => {
+  const fetchStudentProgress = async (studentId: string) => {
     try {
       const response = await fetch(`${USERS_API_URL}/${studentId}/progress`);
       if (response.ok) {
@@ -111,7 +110,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
     }
   }, [viewingStudentProgress]);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    const fetchData = async () => {
       try {
         const [usersRes, statsRes, configRes] = await Promise.all([
           fetch(USERS_API_URL),
@@ -123,7 +123,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
         if (statsRes.ok) setGlobalStats(await statsRes.json());
         if (configRes.ok) {
           const configData = await configRes.json();
-          // Convert array of {key, value} to object if needed, or handle as array
           setConfig(configData);
         }
       } catch (error) {
