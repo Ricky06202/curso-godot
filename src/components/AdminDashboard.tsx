@@ -41,7 +41,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
   const [viewingStudentProgress, setViewingStudentProgress] = useState<Student | null>(null);
   const [studentProgress, setStudentProgress] = useState<any[]>([]);
 
-  const BASE_URL = import.meta.env.PUBLIC_API_URL || 'https://godotapi.rsanjur.com';
+  const BASE_URL = 'https://godotapi.rsanjur.com';
   const API_URL = `${BASE_URL}/api/lessons`;
   const USERS_API_URL = `${BASE_URL}/api/users`;
   const STATS_API_URL = `${BASE_URL}/api/stats/global`;
@@ -110,13 +110,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
     }
   }, [viewingStudentProgress]);
 
+  const fetchLessons = async () => {
+    try {
+      const response = await fetch(API_URL);
+      if (response.ok) {
+        setLessons(await response.json());
+      }
+    } catch (error) {
+      console.error('Error fetching lessons:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [usersRes, statsRes, configRes] = await Promise.all([
+        const [usersRes, statsRes, configRes, lessonsRes] = await Promise.all([
           fetch(USERS_API_URL),
           fetch(STATS_API_URL),
-          fetch(CONFIG_API_URL)
+          fetch(CONFIG_API_URL),
+          fetch(API_URL)
         ]);
 
         if (usersRes.ok) setStudents(await usersRes.json());
@@ -125,6 +137,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
           const configData = await configRes.json();
           setConfig(configData);
         }
+        if (lessonsRes.ok) setLessons(await lessonsRes.json());
       } catch (error) {
         console.error('Error fetching admin data:', error);
       }
@@ -158,9 +171,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
         body: JSON.stringify(reorderedLessons),
       });
       if (response.ok) {
-        // Refresh lessons
-        const updatedLessons = await response.json();
-        setLessons(updatedLessons);
+        // Refresh lessons from server to get correct order
+        await fetchLessons();
       }
     } catch (error) {
       console.error('Error reordering lessons:', error);
@@ -177,8 +189,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
           body: JSON.stringify(data),
         });
         if (response.ok) {
-          const newLesson = await response.json();
-          setLessons([...lessons, newLesson]);
+          await fetchLessons();
         }
       } else {
         // Editar : PUT /api/lessons/:id
@@ -188,8 +199,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
           body: JSON.stringify(data),
         });
         if (response.ok) {
-          const updatedLesson = await response.json();
-          setLessons(lessons.map(l => l.id === editingItem.id ? updatedLesson : l));
+          await fetchLessons();
         }
       }
       setEditingItem(null);
@@ -208,7 +218,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons, 
       });
       
       if (response.ok) {
-        setLessons(lessons.filter(l => l.id !== deletingItem.id));
+        await fetchLessons();
       }
     } catch (error) {
       console.error('Error deleting lesson:', error);

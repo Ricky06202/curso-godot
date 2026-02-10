@@ -18,6 +18,14 @@ interface AdminLessonsProps {
 }
 
 export const AdminLessons: React.FC<AdminLessonsProps> = ({ lessons, onEdit, onDelete, onAdd, onManageResources }) => {
+  const [searchTerm, setSearchTerm] = React.useState('');
+
+  const filteredLessons = lessons
+    .filter(lesson => 
+      lesson.title.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => a.order - b.order);
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <header className="flex justify-between items-center mb-10">
@@ -38,7 +46,16 @@ export const AdminLessons: React.FC<AdminLessonsProps> = ({ lessons, onEdit, onD
         <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5">
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-            <input type="text" placeholder="Buscar lección..." className="w-full bg-godot-dark border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-godot-blue/50" />
+            <input 
+              type="text" 
+              placeholder="Buscar lección..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-godot-dark border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-godot-blue/50" 
+            />
+          </div>
+          <div className="text-xs text-white/40">
+            Total: <span className="text-white font-bold">{filteredLessons.length}</span> lecciones
           </div>
         </div>
         <table className="w-full text-left">
@@ -50,7 +67,7 @@ export const AdminLessons: React.FC<AdminLessonsProps> = ({ lessons, onEdit, onD
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
-            {lessons.map((lesson) => (
+            {filteredLessons.map((lesson) => (
               <tr key={lesson.id} className="hover:bg-white/5 transition-colors group">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
@@ -74,6 +91,13 @@ export const AdminLessons: React.FC<AdminLessonsProps> = ({ lessons, onEdit, onD
                 </td>
               </tr>
             ))}
+            {filteredLessons.length === 0 && (
+              <tr>
+                <td colSpan={3} className="px-6 py-12 text-center text-white/20 italic text-sm">
+                  No se encontraron lecciones
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
