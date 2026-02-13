@@ -12,7 +12,6 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection, onSec
     { id: 'resumen', icon: LayoutDashboard, label: 'Resumen' },
     { id: 'lecciones', icon: Video, label: 'Lecciones' },
     { id: 'estudiantes', icon: Users, label: 'Estudiantes' },
-    { id: 'configuracion', icon: Settings, label: 'Configuración' },
   ];
 
   return (

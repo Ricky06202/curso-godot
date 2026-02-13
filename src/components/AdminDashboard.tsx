@@ -3,7 +3,6 @@ import { AdminSidebar } from './AdminSidebar';
 import { AdminSummary } from './admin/AdminSummary';
 import { AdminLessons } from './admin/AdminLessons';
 import { AdminStudents, UserProgressModal } from './admin/AdminStudents';
-import { AdminSettings } from './admin/AdminSettings';
 import { EditModal, DeleteModal, ResourcesModal } from './admin/AdminModals';
 
 interface Lesson {
@@ -11,6 +10,7 @@ interface Lesson {
   title: string;
   order: number;
   videoUrl: string;
+  description: string;
 }
 
 interface Student {
@@ -33,7 +33,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons =
   const [students, setStudents] = useState<Student[]>(initialUsers);
   const [isLoading, setIsLoading] = useState(true);
   const [globalStats, setGlobalStats] = useState<any>(null);
-  const [config, setConfig] = useState<any>({});
 
   const [editingItem, setEditingItem] = useState<any>(null);
   const [deletingItem, setDeletingItem] = useState<any>(null);
@@ -46,7 +45,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons =
   const API_URL = `${BASE_URL}/api/lessons`;
   const USERS_API_URL = `${BASE_URL}/api/users`;
   const STATS_API_URL = `${BASE_URL}/api/stats/global`;
-  const CONFIG_API_URL = `${BASE_URL}/api/config`;
 
   const fetchResources = async (lessonId: number) => {
     try {
@@ -147,10 +145,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons =
       setIsLoading(true);
       console.log('Iniciando carga de datos desde:', BASE_URL);
       try {
-        const [usersRes, statsRes, configRes, lessonsRes] = await Promise.all([
+        const [usersRes, statsRes, lessonsRes] = await Promise.all([
           fetch(USERS_API_URL),
           fetch(STATS_API_URL),
-          fetch(CONFIG_API_URL),
           fetch(API_URL)
         ]);
 
@@ -164,12 +161,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons =
           const stats = await statsRes.json();
           console.log('Estadísticas cargadas:', stats);
           setGlobalStats(stats);
-        }
-
-        if (configRes.ok) {
-          const configData = await configRes.json();
-          console.log('Configuración cargada');
-          setConfig(configData);
         }
 
         if (lessonsRes.ok) {
@@ -306,15 +297,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons =
             lessons={lessons} 
             onEdit={setEditingItem} 
             onDelete={setDeletingItem} 
-            onAdd={() => setEditingItem({ id: 'new', title: '', videoUrl: '', order: lessons.length + 1 })}
+            onAdd={() => setEditingItem({ id: 'new', title: '', videoUrl: '', description: '', order: lessons.length + 1 })}
             onReorder={handleReorderLessons}
             onManageResources={setManagingResourcesLesson}
           />
         );
       case 'estudiantes':
         return <AdminStudents students={students} onViewProgress={setViewingStudentProgress} />;
-      case 'configuracion':
-        return <AdminSettings config={config} onUpdateConfig={handleUpdateConfig} />;
       default:
         return null;
     }

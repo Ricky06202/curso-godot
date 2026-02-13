@@ -17,6 +17,7 @@ export const EditModal: React.FC<EditModalProps> = ({ item, onClose, onSave }) =
     const data = {
       title: formData.get('title'),
       videoUrl: formData.get('videoUrl'),
+      description: formData.get('description'),
       order: Number(formData.get('order')) || 1
     };
     onSave(data);
@@ -53,6 +54,16 @@ export const EditModal: React.FC<EditModalProps> = ({ item, onClose, onSave }) =
                 defaultValue={item.videoUrl} 
                 required
                 className="w-full bg-godot-dark border border-white/10 rounded-xl px-4 py-3 text-white focus:border-godot-blue outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-white/40 uppercase mb-2 block">Descripción (Sobre esta lección)</label>
+              <textarea 
+                name="description"
+                defaultValue={item.description} 
+                required
+                rows={3}
+                className="w-full bg-godot-dark border border-white/10 rounded-xl px-4 py-3 text-white focus:border-godot-blue outline-none transition-all resize-none"
               />
             </div>
             <div>
