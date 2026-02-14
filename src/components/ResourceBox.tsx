@@ -5,7 +5,7 @@ import { Code2, Copy, Check } from 'lucide-react';
 interface Resource {
   id: number;
   title: string;
-  content: string;
+  description: string; // Cambiado de 'content' a 'description'
   type: string;
 }
 
@@ -36,7 +36,7 @@ export const ResourceBox: React.FC<ResourceBoxProps> = ({ resources }) => {
               <div className="flex justify-between items-center">
                 <h4 className="text-sm font-bold text-white/70 uppercase tracking-wider">{res.title}</h4>
                 <button
-                  onClick={() => handleCopy(res.id, res.content)}
+                  onClick={() => handleCopy(res.id, res.description)}
                   className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border border-white/5"
                 >
                   {copiedId === res.id ? (
@@ -56,7 +56,7 @@ export const ResourceBox: React.FC<ResourceBoxProps> = ({ resources }) => {
                 <div className="absolute inset-0 bg-godot-blue/5 rounded-xl blur-sm group-hover:bg-godot-blue/10 transition-all" />
                 <div className="relative font-mono text-[11px] bg-black/40 rounded-xl p-5 border border-white/5 overflow-x-auto custom-scrollbar max-h-[400px]">
                   <pre className="text-godot-blue/90 leading-relaxed">
-                    <code>{res.content}</code>
+                    <code>{res.description}</code>
                   </pre>
                 </div>
               </div>

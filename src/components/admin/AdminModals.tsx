@@ -153,8 +153,7 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = ({ lesson, onClose,
     const formData = new FormData(e.target as HTMLFormElement);
     const data = {
       title: formData.get('title'),
-      url: '',
-      content: formData.get('content'),
+      description: formData.get('content'), // Enviamos como 'description' según el nuevo backend
       type: 'code'
     };
     onAdd(data);
