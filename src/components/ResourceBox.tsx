@@ -1,96 +1,73 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Download, Code2 } from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Code2, Copy, Check } from 'lucide-react';
 
-interface ResourceBoxProps {
-  description: string;
-  code?: string;
-  downloadUrl?: string;
+interface Resource {
+  id: number;
+  title: string;
+  content: string;
+  type: string;
 }
 
-export const ResourceBox: React.FC<ResourceBoxProps> = ({ description, code, downloadUrl }) => {
-  const [activeTab, setActiveTab] = useState<'description' | 'code' | 'downloads'>('description');
+interface ResourceBoxProps {
+  resources: Resource[];
+}
 
-  const tabs = [
-    { id: 'description', label: 'Descripción', icon: FileText },
-    { id: 'code', label: 'Código GDScript', icon: Code2 },
-    { id: 'downloads', label: 'Recursos', icon: Download },
-  ];
+export const ResourceBox: React.FC<ResourceBoxProps> = ({ resources }) => {
+  const [copiedId, setCopiedId] = React.useState<number | null>(null);
+
+  const handleCopy = (id: number, content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   return (
-    <div className="bg-godot-darker rounded-xl border border-white/10 overflow-hidden min-h-[300px] flex flex-col shadow-xl">
-      <div className="flex border-b border-white/10 bg-white/5">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-all relative ${
-              activeTab === tab.id ? 'text-godot-blue bg-godot-blue/5' : 'text-white/50 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-            {activeTab === tab.id && (
-              <motion.div
-                layoutId="active-tab"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-godot-blue"
-              />
-            )}
-          </button>
-        ))}
+    <div className="bg-godot-darker rounded-2xl border border-white/10 overflow-hidden flex flex-col shadow-xl">
+      <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center gap-2">
+        <Code2 className="w-5 h-5 text-godot-blue" />
+        <h3 className="font-bold text-white">Código GDScript</h3>
       </div>
 
-      <div className="p-6 flex-1">
-        <AnimatePresence mode="wait">
-          {activeTab === 'description' && (
-            <motion.div
-              key="desc"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="prose prose-invert max-w-none"
-            >
-              <p className="text-white/70 leading-relaxed">{description}</p>
-            </motion.div>
-          )}
-
-          {activeTab === 'code' && (
-            <motion.div
-              key="code"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="font-mono text-sm bg-black/30 rounded-lg p-4 border border-white/5 overflow-x-auto custom-scrollbar"
-            >
-              <pre className="text-godot-blue/80">
-                <code>{code || '# No hay código disponible para esta lección.'}</code>
-              </pre>
-            </motion.div>
-          )}
-
-          {activeTab === 'downloads' && (
-            <motion.div
-              key="downloads"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="flex flex-col items-center justify-center py-8 text-center"
-            >
-              <div className="w-16 h-16 rounded-2xl bg-godot-blue/10 flex items-center justify-center mb-4 border border-godot-blue/20">
-                <Download className="w-8 h-8 text-godot-blue" />
+      <div className="p-6 space-y-6">
+        {resources.length > 0 ? (
+          resources.map((res) => (
+            <div key={res.id} className="space-y-3">
+              <div className="flex justify-between items-center">
+                <h4 className="text-sm font-bold text-white/70 uppercase tracking-wider">{res.title}</h4>
+                <button
+                  onClick={() => handleCopy(res.id, res.content)}
+                  className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border border-white/5"
+                >
+                  {copiedId === res.id ? (
+                    <>
+                      <Check className="w-3 h-3 text-godot-green" />
+                      Copiado
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3" />
+                      Copiar
+                    </>
+                  )}
+                </button>
               </div>
-              <h4 className="font-bold mb-2">Proyecto de Godot (.zip)</h4>
-              <p className="text-sm text-white/50 mb-6 max-w-xs">Descarga los archivos base y el código final de esta lección para practicar en local.</p>
-              <a 
-                href={downloadUrl}
-                className="px-6 py-3 bg-godot-blue hover:bg-godot-blue/80 text-white rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-godot-blue/20"
-              >
-                <Download className="w-4 h-4" />
-                Descargar Recursos
-              </a>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <div className="relative group">
+                <div className="absolute inset-0 bg-godot-blue/5 rounded-xl blur-sm group-hover:bg-godot-blue/10 transition-all" />
+                <div className="relative font-mono text-[11px] bg-black/40 rounded-xl p-5 border border-white/5 overflow-x-auto custom-scrollbar max-h-[400px]">
+                  <pre className="text-godot-blue/90 leading-relaxed">
+                    <code>{res.content}</code>
+                  </pre>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="py-12 text-center border-2 border-dashed border-white/5 rounded-2xl">
+            <Code2 className="w-10 h-10 text-white/5 mx-auto mb-3" />
+            <p className="text-sm text-white/20 italic">No hay fragmentos de código para esta lección.</p>
+          </div>
+        )}
       </div>
     </div>
   );

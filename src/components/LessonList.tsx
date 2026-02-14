@@ -5,9 +5,12 @@ import { motion } from 'framer-motion';
 export interface Lesson {
   id: string;
   title: string;
+  description?: string;
+  videoUrl?: string;
   duration: string;
   completed: boolean;
   isLocked?: boolean;
+  resources?: any[];
 }
 
 interface LessonListProps {

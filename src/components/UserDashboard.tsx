@@ -23,6 +23,8 @@ export const UserDashboard: React.FC = () => {
           ...lesson,
           id: lesson.id.toString(),
           duration: "5:00",
+          description: lesson.description || "",
+          resources: lesson.resources || [],
           completed: data.progress.some((p: any) => p.lessonId === lesson.id && p.completed)
         }));
         setLessons(mappedLessons);
@@ -128,14 +130,14 @@ export const UserDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <div className="glass p-6 rounded-2xl border border-white/10">
               <h3 className="text-lg font-bold text-white mb-4">Sobre esta lección</h3>
-              <p className="text-white/60 text-sm leading-relaxed">
-                En esta lección titulada "{activeLesson?.title}", profundizaremos en los conceptos clave de Godot 4.6 para mejorar tu flujo de trabajo.
+              <p className="text-white/60 text-sm leading-relaxed whitespace-pre-wrap">
+                {activeLesson?.description || `En esta lección titulada "${activeLesson?.title}", profundizaremos en los conceptos clave de Godot para mejorar tu flujo de trabajo.`}
               </p>
             </div>
-            <ResourceBox lessonId={activeLesson?.id || ""} />
+            <ResourceBox resources={activeLesson?.resources || []} />
           </div>
         </div>
 
