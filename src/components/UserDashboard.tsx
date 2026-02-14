@@ -8,17 +8,37 @@ import { CompletionButton } from './CompletionButton';
 export const UserDashboard: React.FC = () => {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
+  const [activeResources, setActiveResources] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userId] = useState("1"); // TODO: Obtener de la sesión real
 
   const BASE_URL = 'https://godotapi.rsanjur.com';
 
+  const fetchResources = async (lessonId: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/lessons/${lessonId}/resources`);
+      if (response.ok) {
+        const resources = await response.json();
+        setActiveResources(resources);
+      }
+    } catch (error) {
+      console.error('Error fetching resources:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeLesson) {
+      fetchResources(activeLesson.id);
+    }
+  }, [activeLesson?.id]);
+
   const fetchData = async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/course/${userId}`);
       if (response.ok) {
         const data = await response.json();
+        console.log('Datos de la API (course):', data);
         const mappedLessons = data.lessons.map((lesson: any) => ({
           ...lesson,
           id: lesson.id.toString(),
@@ -53,7 +73,9 @@ export const UserDashboard: React.FC = () => {
   }, []);
 
   const handleLessonSelect = (lesson: Lesson) => {
-    setActiveLesson(lesson);
+    // Buscar la lección completa en el estado de lecciones para tener todos los datos
+    const fullLesson = lessons.find(l => l.id === lesson.id) || lesson;
+    setActiveLesson(fullLesson);
     // Actualizar URL sin recargar
     const url = new URL(window.location.href);
     url.searchParams.set('lesson', lesson.id);
@@ -137,7 +159,7 @@ export const UserDashboard: React.FC = () => {
                 {activeLesson?.description || `En esta lección titulada "${activeLesson?.title}", profundizaremos en los conceptos clave de Godot para mejorar tu flujo de trabajo.`}
               </p>
             </div>
-            <ResourceBox resources={activeLesson?.resources || []} />
+            <ResourceBox resources={activeResources} />
           </div>
         </div>
 
