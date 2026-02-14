@@ -83,10 +83,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons =
   const handleUpdateResource = async (resourceId: number, data: any) => {
     if (!managingResourcesLesson) return;
     try {
-      const response = await fetch(`${BASE_URL}/api/resources/${resourceId}`, {
+      // Determinar qué endpoint usar basándonos en el tipo de recurso
+      const resource = resources.find(r => r.id === resourceId);
+      const isCodeSnippet = resource?.type === 'code' || resource?.code;
+      const endpoint = isCodeSnippet 
+        ? `${BASE_URL}/api/codes/${resourceId}`
+        : `${BASE_URL}/api/resources/${resourceId}`;
+
+      const body = isCodeSnippet 
+        ? { title: data.title, code: data.description }
+        : { title: data.title, description: data.description };
+
+      const response = await fetch(endpoint, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(body),
       });
       if (response.ok) {
         fetchResources(managingResourcesLesson.id);
