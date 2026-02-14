@@ -11,6 +11,7 @@ interface Lesson {
   order: number;
   videoUrl: string;
   description: string;
+  duration: string;
 }
 
 interface Student {
@@ -297,7 +298,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons =
             lessons={lessons} 
             onEdit={setEditingItem} 
             onDelete={setDeletingItem} 
-            onAdd={() => setEditingItem({ id: 'new', title: '', videoUrl: '', description: '', order: lessons.length + 1 })}
+            onAdd={() => setEditingItem({ id: 'new', title: '', videoUrl: '', description: '', duration: 300, order: lessons.length + 1 })}
             onReorder={handleReorderLessons}
             onManageResources={setManagingResourcesLesson}
           />

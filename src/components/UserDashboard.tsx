@@ -22,7 +22,7 @@ export const UserDashboard: React.FC = () => {
         const mappedLessons = data.lessons.map((lesson: any) => ({
           ...lesson,
           id: lesson.id.toString(),
-          duration: "5:00",
+          duration: lesson.duration,
           description: lesson.description || "",
           resources: lesson.resources || [],
           completed: data.progress.some((p: any) => p.lessonId === lesson.id && p.completed)

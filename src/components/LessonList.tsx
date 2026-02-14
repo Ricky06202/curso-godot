@@ -20,11 +20,28 @@ interface LessonListProps {
 }
 
 export const LessonList: React.FC<LessonListProps> = ({ lessons, activeLessonId, onLessonSelect }) => {
+  const totalSeconds = lessons.reduce((acc, lesson) => {
+    return acc + (Number(lesson.duration) || 0);
+  }, 0);
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const durationText = hours > 0 
+    ? `${hours}h ${minutes}m total`
+    : `${minutes}m total`;
+
+  const formatLessonDuration = (seconds: number | string) => {
+    const total = Number(seconds) || 0;
+    const mins = Math.floor(total / 60);
+    const secs = total % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="flex flex-col h-full bg-godot-darker rounded-xl border border-white/10 overflow-hidden">
       <div className="p-4 border-b border-white/10 bg-white/5">
         <h3 className="font-bold text-sm uppercase tracking-widest text-godot-blue">Contenido del Curso</h3>
-        <p className="text-[10px] text-white/50 mt-1">12 Lecciones • 1h 15m total</p>
+        <p className="text-[10px] text-white/50 mt-1">{lessons.length} Lecciones • {durationText}</p>
       </div>
       
       <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
@@ -66,7 +83,7 @@ export const LessonList: React.FC<LessonListProps> = ({ lessons, activeLessonId,
                   <span className="text-[10px] text-white/30 mr-2 font-mono">{(index + 1).toString().padStart(2, '0')}</span>
                   {lesson.title}
                 </p>
-                <p className="text-[10px] text-white/40 mt-0.5">{lesson.duration}</p>
+                <p className="text-[10px] text-white/40 mt-0.5">{formatLessonDuration(lesson.duration)}</p>
               </div>
             </motion.button>
           );

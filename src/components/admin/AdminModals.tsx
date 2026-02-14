@@ -14,14 +14,30 @@ export const EditModal: React.FC<EditModalProps> = ({ item, onClose, onSave }) =
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
+    
+    // Obtener minutos y segundos por separado
+    const mins = Number(formData.get('duration_mins')) || 0;
+    const secs = Number(formData.get('duration_secs')) || 0;
+    const totalSeconds = (mins * 60) + secs;
+
     const data = {
       title: formData.get('title'),
       videoUrl: formData.get('videoUrl'),
       description: formData.get('description'),
+      duration: totalSeconds,
       order: Number(formData.get('order')) || 1
     };
     onSave(data);
   };
+
+  // Obtener minutos y segundos para los inputs
+  const getDurationParts = (totalSeconds: number) => {
+    const mins = Math.floor((totalSeconds || 0) / 60);
+    const secs = (totalSeconds || 0) % 60;
+    return { mins, secs };
+  };
+
+  const durationParts = getDurationParts(item.duration);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -66,15 +82,45 @@ export const EditModal: React.FC<EditModalProps> = ({ item, onClose, onSave }) =
                 className="w-full bg-godot-dark border border-white/10 rounded-xl px-4 py-3 text-white focus:border-godot-blue outline-none transition-all resize-none"
               />
             </div>
-            <div>
-              <label className="text-xs font-bold text-white/40 uppercase mb-2 block">Orden</label>
-              <input 
-                name="order"
-                type="number" 
-                defaultValue={item.order || 1} 
-                required
-                className="w-full bg-godot-dark border border-white/10 rounded-xl px-4 py-3 text-white focus:border-godot-blue outline-none"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-white/40 uppercase block">Duración</label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 relative">
+                    <input 
+                      name="duration_mins"
+                      type="number" 
+                      defaultValue={item.id === 'new' ? 5 : durationParts.mins} 
+                      min="0"
+                      required
+                      className="w-full bg-godot-dark border border-white/10 rounded-xl px-4 py-3 text-white focus:border-godot-blue outline-none transition-all pr-10"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/20 font-bold">MIN</span>
+                  </div>
+                  <div className="flex-1 relative">
+                    <input 
+                      name="duration_secs"
+                      type="number" 
+                      defaultValue={item.id === 'new' ? 0 : durationParts.secs} 
+                      min="0"
+                      max="59"
+                      required
+                      className="w-full bg-godot-dark border border-white/10 rounded-xl px-4 py-3 text-white focus:border-godot-blue outline-none transition-all pr-10"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/20 font-bold">SEG</span>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-white/40 uppercase block">Orden</label>
+                <input 
+                  name="order"
+                  type="number" 
+                  defaultValue={item.order || 1} 
+                  required
+                  className="w-full bg-godot-dark border border-white/10 rounded-xl px-4 py-3 text-white focus:border-godot-blue outline-none transition-all"
+                />
+              </div>
             </div>
           </div>
           <div className="p-6 bg-white/5 flex justify-end gap-3">
