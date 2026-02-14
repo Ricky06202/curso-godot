@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash, FileText, Download, X } from 'lucide-react';
+import { Plus, Trash, FileText, Download, X, Code2, Pencil, Trash2 } from 'lucide-react';
 
 interface EditModalProps {
   item: any;
@@ -139,12 +139,13 @@ interface ResourcesModalProps {
   lesson: any;
   onClose: () => void;
   onAdd: (data: any) => void;
+  onUpdate: (id: number, data: any) => void;
   onDelete: (id: number) => void;
   resources: any[];
 }
 
-export const ResourcesModal: React.FC<ResourcesModalProps> = ({ lesson, onClose, onAdd, onDelete, resources }) => {
-  const [resourceType, setResourceType] = React.useState('link');
+export const ResourcesModal: React.FC<ResourcesModalProps> = ({ lesson, onClose, onAdd, onUpdate, onDelete, resources }) => {
+  const [editingResource, setEditingResource] = React.useState<any>(null);
 
   if (!lesson) return null;
 
@@ -153,10 +154,16 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = ({ lesson, onClose,
     const formData = new FormData(e.target as HTMLFormElement);
     const data = {
       title: formData.get('title'),
-      description: formData.get('content'), // Enviamos como 'description' según el nuevo backend
+      description: formData.get('content'),
       type: 'code'
     };
-    onAdd(data);
+
+    if (editingResource) {
+      onUpdate(editingResource.id, data);
+      setEditingResource(null);
+    } else {
+      onAdd(data);
+    }
     (e.target as HTMLFormElement).reset();
   };
 
@@ -176,67 +183,88 @@ export const ResourcesModal: React.FC<ResourcesModalProps> = ({ lesson, onClose,
         </div>
 
         <div className="p-6 overflow-y-auto flex-1 space-y-8">
+          {/* Formulario para añadir/editar */}
+          <form onSubmit={handleSubmit} className="space-y-4 bg-white/5 p-4 rounded-xl border border-white/10">
+            <h4 className="text-sm font-bold text-white/40 uppercase tracking-wider">
+              {editingResource ? 'Editar Código' : 'Añadir Nuevo Código'}
+            </h4>
+            <div className="space-y-4">
+              <input 
+                name="title"
+                placeholder="Título del script (ej: Movimiento del Jugador)" 
+                required
+                defaultValue={editingResource?.title || ''}
+                key={editingResource ? `edit-title-${editingResource.id}` : 'add-title'}
+                className="w-full bg-godot-dark border border-white/10 rounded-xl px-4 py-3 text-white focus:border-godot-blue outline-none transition-all"
+              />
+              <textarea 
+                name="content"
+                placeholder="Pega tu código GDScript aquí..." 
+                required
+                defaultValue={editingResource?.description || ''}
+                key={editingResource ? `edit-desc-${editingResource.id}` : 'add-desc'}
+                rows={8}
+                className="w-full bg-godot-dark border border-white/10 rounded-xl px-4 py-3 text-white focus:border-godot-blue outline-none transition-all font-mono text-sm"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button 
+                type="submit" 
+                className="flex-1 bg-godot-blue hover:bg-godot-blue/80 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-godot-blue/20"
+              >
+                {editingResource ? 'Guardar Cambios' : 'Anexar Código'}
+              </button>
+              {editingResource && (
+                <button 
+                  type="button"
+                  onClick={() => setEditingResource(null)}
+                  className="px-6 bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-xl transition-all"
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
+
           {/* Listado de códigos */}
-          <div>
-            <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4 block">Códigos Guardados</label>
-            <div className="space-y-2">
-              {resources.length > 0 ? resources.map((res) => (
-                <div key={res.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 group hover:border-white/10 transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-godot-blue/10 rounded-lg text-godot-blue">
-                      <FileText className="w-4 h-4" />
+          <div className="space-y-4">
+            <h4 className="text-sm font-bold text-white/40 uppercase tracking-wider">Códigos Anexados</h4>
+            <div className="grid gap-3">
+              {resources.length === 0 ? (
+                <div className="text-center py-8 text-white/20 border-2 border-dashed border-white/5 rounded-2xl">
+                  No hay códigos anexados a esta lección
+                </div>
+              ) : (
+                resources.map((res) => (
+                  <div key={res.id} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10 group">
+                    <div className="flex items-center gap-3">
+                      <Code2 className="w-5 h-5 text-godot-blue" />
+                      <div>
+                        <span className="text-white font-medium block">{res.title}</span>
+                        <span className="text-[10px] text-white/30 uppercase font-bold tracking-widest">{res.type}</span>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">{res.title}</p>
-                      <p className="text-[10px] text-white/30 uppercase">GDScript</p>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => setEditingResource(res)}
+                        className="p-2 text-white/20 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                        title="Editar"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => onDelete(res.id)}
+                        className="p-2 text-white/20 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-                  <button onClick={() => onDelete(res.id)} className="p-2 text-white/20 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100">
-                    <Trash className="w-4 h-4" />
-                  </button>
-                </div>
-              )) : (
-                <div className="border-2 border-dashed border-white/5 rounded-2xl p-8 text-center">
-                  <FileText className="w-8 h-8 text-white/10 mx-auto mb-2" />
-                  <p className="text-sm text-white/20">No hay códigos asociados a esta lección.</p>
-                </div>
+                ))
               )}
             </div>
           </div>
-
-          <div className="h-px bg-white/5" />
-
-          {/* Formulario simplificado para código */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2 block">Añadir Nuevo Snippet</label>
-            
-            <input 
-              name="title"
-              type="text" 
-              placeholder="Título (ej: Movimiento del Jugador)" 
-              required
-              className="w-full bg-godot-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-godot-blue outline-none transition-all"
-            />
-
-            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-              <textarea 
-                name="content"
-                placeholder="Pega aquí tu código GDScript..." 
-                required
-                rows={10}
-                className="w-full bg-godot-dark border border-white/10 rounded-xl px-4 py-3 text-xs font-mono text-godot-blue focus:border-godot-blue outline-none transition-all resize-none"
-              />
-              <p className="text-[10px] text-white/30 mt-2 italic">El código se guardará como texto en la base de datos.</p>
-            </div>
-
-            <button 
-              type="submit" 
-              className="w-full bg-godot-blue hover:bg-godot-blue/80 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-godot-blue/20 flex items-center justify-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Guardar Código
-            </button>
-          </form>
         </div>
       </motion.div>
     </div>

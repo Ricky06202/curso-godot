@@ -80,6 +80,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons =
     }
   };
 
+  const handleUpdateResource = async (resourceId: number, data: any) => {
+    if (!managingResourcesLesson) return;
+    try {
+      const response = await fetch(`${BASE_URL}/api/resources/${resourceId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (response.ok) {
+        fetchResources(managingResourcesLesson.id);
+      }
+    } catch (error) {
+      console.error('Error updating resource:', error);
+    }
+  };
+
   const handleDeleteResource = async (resourceId: number) => {
     try {
       const response = await fetch(`${BASE_URL}/api/resources/${resourceId}`, {
@@ -319,13 +335,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ initialLessons =
 
       <EditModal item={editingItem} onClose={() => setEditingItem(null)} onSave={handleSave} />
       <DeleteModal item={deletingItem} onClose={() => setDeletingItem(null)} onConfirm={handleDelete} />
-      <ResourcesModal 
-        lesson={managingResourcesLesson} 
-        resources={resources}
-        onClose={() => setManagingResourcesLesson(null)} 
-        onAdd={handleAddResource}
-        onDelete={handleDeleteResource}
-      />
+      {managingResourcesLesson && (
+        <ResourcesModal 
+          lesson={managingResourcesLesson} 
+          resources={resources}
+          onClose={() => setManagingResourcesLesson(null)} 
+          onAdd={handleAddResource}
+          onUpdate={handleUpdateResource}
+          onDelete={handleDeleteResource}
+        />
+      )}
       <UserProgressModal 
         student={viewingStudentProgress}
         progress={studentProgress}

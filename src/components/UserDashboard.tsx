@@ -20,6 +20,7 @@ export const UserDashboard: React.FC = () => {
       const response = await fetch(`${BASE_URL}/api/lessons/${lessonId}/resources`);
       if (response.ok) {
         const resources = await response.json();
+        console.log(`Recursos para lección ${lessonId}:`, resources);
         setActiveResources(resources);
       }
     } catch (error) {
@@ -29,7 +30,19 @@ export const UserDashboard: React.FC = () => {
 
   useEffect(() => {
     if (activeLesson) {
-      fetchResources(activeLesson.id);
+      // Si la lección ya tiene recursos o códigos de la carga inicial, usarlos
+      const initialResources = [
+        ...(activeLesson.resources || []),
+        ...(activeLesson.codes || [])
+      ];
+      
+      if (initialResources.length > 0) {
+        console.log('Usando recursos pre-cargados:', initialResources);
+        setActiveResources(initialResources);
+      } else {
+        // Si no, intentar cargar de la API
+        fetchResources(activeLesson.id);
+      }
     }
   }, [activeLesson?.id]);
 
@@ -38,13 +51,17 @@ export const UserDashboard: React.FC = () => {
       const response = await fetch(`${BASE_URL}/api/course/${userId}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('Datos de la API (course):', data);
+        console.log('DATOS DEL CURSO:', data);
+        if (data.lessons && data.lessons.length > 0) {
+          console.log('RECURSOS DE LA PRIMERA LECCIÓN:', data.lessons[0].resources);
+        }
         const mappedLessons = data.lessons.map((lesson: any) => ({
           ...lesson,
           id: lesson.id.toString(),
           duration: lesson.duration,
           description: lesson.description || "",
           resources: lesson.resources || [],
+          codes: lesson.codes || [],
           completed: data.progress.some((p: any) => p.lessonId === lesson.id && p.completed)
         }));
         setLessons(mappedLessons);
